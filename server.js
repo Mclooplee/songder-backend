@@ -127,4 +127,5 @@ app.get('/search-music', async (req, res) => {
   res.json(results);
 });
 
-app.listen(process.env.PORT, () => console.log(`Songder backend running on port ${process.env.PORT}`));``
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log('Songder backend running on port ' + PORT));
