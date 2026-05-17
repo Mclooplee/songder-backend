@@ -1,4 +1,5 @@
-require('dotenv').config({ path: false });
+const dotenv = require('dotenv');
+if (process.env.NODE_ENV !== 'production') dotenv.config();
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
