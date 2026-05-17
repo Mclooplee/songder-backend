@@ -1,19 +1,24 @@
-process.env.SUPABASE_URL = process.env.SUPABASE_URL || 'https://kwhefthqymjshcggazjq.supabase.co';
-process.env.SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3aGVmdGhxeW1qc2hjZ2dhempxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0OTIwMzIsImV4cCI6MjA5MzA2ODAzMn0.dxlpxZYgdu0lQ8y64UL-1ih1E9hdayMXBVr4y7wsVaU';
-process.env.RESEND_API_KEY = process.env.RESEND_API_KEY || 're_Jwc9Wi6v_2oAs7mELDEKMFj6LbSGSuWSv';
-
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
 const fetch = require('node-fetch');
 
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-const resend = new Resend(process.env.RESEND_API_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const resend = new Resend(RESEND_API_KEY);
+
+// ── TEST ROUTE ────────────────────────────────────────
+app.get('/', (req, res) => {
+  res.json({ status: 'Songder backend is running!' });
+});
 
 // ── WAITLIST ──────────────────────────────────────────
 app.post('/waitlist', async (req, res) => {
@@ -23,35 +28,29 @@ app.post('/waitlist', async (req, res) => {
   const { error } = await supabase.from('waitlist').insert({ email });
   if (error) return res.status(400).json({ error: 'Already registered or invalid email' });
 
-  // Envoie le mail de confirmation
-  await resend.emails.send({
-    from: 'Songder <hello@songder.app>',
-    to: email,
-    subject: "You're on the list. 🎵",
-    html: `
-      <div style="background:#050507;color:#f0f0f5;padding:48px;font-family:sans-serif;max-width:520px">
-        <h1 style="font-size:40px;font-weight:900;letter-spacing:-1px;margin-bottom:8px">SONG<span style="color:#00aaff">DER</span></h1>
-        <p style="color:#a0a0b5;font-size:13px;margin-bottom:32px">What music makes you feel</p>
-        <h2 style="font-size:22px;margin-bottom:12px">You're on the list. ✓</h2>
-        <p style="color:#a0a0b5;line-height:1.7">We're building something for people who feel music deeply. You'll be among the first to know when we launch.</p>
-        <p style="color:#a0a0b5;margin-top:24px;line-height:1.7">In the meantime, try our beta and share what a song makes you feel.</p>
-        <a href="https://songder.netlify.app" style="display:inline-block;margin-top:24px;background:#00aaff;color:#050507;padding:12px 28px;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none">Try the beta →</a>
-        <p style="color:#5a5a6a;font-size:11px;margin-top:48px;letter-spacing:1px">by looplee</p>
-      </div>
-    `
-  });
+  try {
+    const emailResult = await resend.emails.send({
+      from: 'Songder <onboarding@resend.dev>',
+      to: email,
+      subject: "You're on the list. 🎵",
+      html: '<p>Welcome to Songder!</p>'
+    });
+    console.log('Email sent:', JSON.stringify(emailResult));
+  } catch(err) {
+    console.log('Email error:', err.message);
+  }
 
   res.json({ success: true });
 });
 
 // ── COMMENTAIRES ──────────────────────────────────────
 app.post('/comments', async (req, res) => {
-  const { song, artist, feeling, mood } = req.body;
+  const { song, feeling, mood } = req.body;
   if (!song || !feeling) return res.status(400).json({ error: 'Missing fields' });
 
   const { data, error } = await supabase
     .from('comments')
-    .insert({ song, artist, feeling, mood })
+    .insert({ song, feeling, mood })
     .select().single();
 
   if (error) return res.status(500).json({ error });
@@ -60,7 +59,7 @@ app.post('/comments', async (req, res) => {
 
 app.get('/comments', async (req, res) => {
   const { sort, mood, search } = req.query;
-  let query = supabase.from('comments').select('*, replies(*)');
+  let query = supabase.from('comments').select('*');
 
   if (mood) query = query.eq('mood', mood);
   if (search) query = query.or(`song.ilike.%${search}%,feeling.ilike.%${search}%`);
@@ -79,18 +78,15 @@ app.post('/comments/:id/vote', async (req, res) => {
   const { fingerprint } = req.body;
   const { id } = req.params;
 
-  // Vérifie si déjà voté
   const { data: existing } = await supabase
     .from('votes').select().eq('comment_id', id).eq('fingerprint', fingerprint).single();
 
   if (existing) return res.status(400).json({ error: 'Already voted' });
 
   await supabase.from('votes').insert({ comment_id: id, fingerprint });
-  await supabase.from('comments').update({ votes: supabase.rpc('increment', { row_id: id }) }).eq('id', id);
 
-  // Simple increment
   const { data: comment } = await supabase.from('comments').select('votes').eq('id', id).single();
-  await supabase.from('comments').update({ votes: comment.votes + 1 }).eq('id', id);
+  await supabase.from('comments').update({ votes: (comment.votes || 0) + 1 }).eq('id', id);
 
   res.json({ success: true });
 });
@@ -108,7 +104,7 @@ app.post('/comments/:id/reply', async (req, res) => {
   res.json(data);
 });
 
-// ── AUTOCOMPLETE MUSICBRAINZ ──────────────────────────
+// ── AUTOCOMPLETE ──────────────────────────────────────
 app.get('/search-music', async (req, res) => {
   const { q } = req.query;
   if (!q || q.length < 2) return res.json([]);
