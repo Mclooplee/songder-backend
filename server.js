@@ -1,5 +1,7 @@
-const dotenv = require('dotenv');
-if (process.env.NODE_ENV !== 'production') dotenv.config();
+process.env.SUPABASE_URL = process.env.SUPABASE_URL || 'https://kwhefthqymjshcggazjq.supabase.co';
+process.env.SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3aGVmdGhxeW1qc2hjZ2dhempxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0OTIwMzIsImV4cCI6MjA5MzA2ODAzMn0.dxlpxZYgdu0lQ8y64UL-1ih1E9hdayMXBVr4y7wsVaU';
+process.env.RESEND_API_KEY = process.env.RESEND_API_KEY || 're_Jwc9Wi6v_2oAs7mELDEKMFj6LbSGSuWSv';
+
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
