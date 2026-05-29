@@ -30,8 +30,7 @@ app.post('/waitlist', async (req, res) => {
 
   try {
     const emailResult = await resend.emails.send({
-      from: 'Songder <onboarding@resend.dev>',
-      to: email,
+from: 'Songder <hello@songder.app>',      to: email,
       subject: "You're on the list. 🎵",
       html: '<p>Welcome to Songder!</p>'
     });
