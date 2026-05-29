@@ -32,15 +32,7 @@ app.post('/waitlist', async (req, res) => {
     const emailResult = await resend.emails.send({
 from: 'Songder <hello@songder.app>',      to: email,
       subject: "You're on the list. 🎵",
-      html: '<p>Welcome to Songder!</p>'
-    });
-    console.log('Email sent:', JSON.stringify(emailResult));
-  } catch(err) {
-    console.log('Email error:', err.message);
-  }
-
-  res.json({ success: true });
-});
+      html: `<div style="background:#050507;color:#f0f0f5;padding:48px;font-family:sans-serif;max-width:520px"><h1 style="font-size:40px;font-weight:900;letter-spacing:-1px;margin-bottom:8px">SONG<span style="color:#00aaff">DER</span></h1><p style="color:#a0a0b5;font-size:13px;margin-bottom:32px;letter-spacing:2px;text-transform:uppercase">What music makes you feel</p><h2 style="font-size:22px;margin-bottom:12px">You're on the list ✓ 🎵</h2><p style="color:#a0a0b5;line-height:1.8;margin-bottom:16px">Thank you so much for joining Songder 🙏 You're one of the first people to believe in this project — and that means everything to us.</p><p style="color:#a0a0b5;line-height:1.8;margin-bottom:16px">Every sign-up helps us build the app 🚀 You'll be among the very first to know when we launch.</p><p style="color:#a0a0b5;line-height:1.8;margin-bottom:32px">In the meantime, try our beta and share what a song makes you feel 🎶</p><a href="https://songder.app" style="display:inline-block;background:#00aaff;color:#050507;padding:14px 28px;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none">Try the beta →</a><hr style="border:none;border-top:1px solid #2a2a35;margin:32px 0"><p style="color:#a0a0b5;line-height:1.8;margin-bottom:16px;font-size:13px">Merci infiniment de rejoindre Songder 🙏 Tu fais partie des premiers à croire en ce projet — et ça compte énormément pour nous.</p><p style="color:#a0a0b5;line-height:1.8;margin-bottom:16px;font-size:13px">Chaque inscription nous aide à construire l'app 🚀 Tu seras parmi les tout premiers informés du lancement.</p><p style="color:#5a5a6a;font-size:11px;margin-top:32px;letter-spacing:1px">with ❤️ by looplee · songder.app</p></div>`,
 
 // ── COMMENTAIRES ──────────────────────────────────────
 app.post('/comments', async (req, res) => {
