@@ -39,9 +39,9 @@ app.post('/waitlist', async (req, res) => {
 });
 
 app.post('/comments', async (req, res) => {
-  const { song, feeling, mood } = req.body;
+  const { song, artist, feeling, mood } = req.body;
   if (!song || !feeling) return res.status(400).json({ error: 'Missing fields' });
-  const { data, error } = await supabase.from('comments').insert({ song, feeling, mood }).select().single();
+  const { data, error } = await supabase.from('comments').insert({ song, artist, feeling, mood }).select().single();
   if (error) return res.status(500).json({ error });
   res.json(data);
 });
