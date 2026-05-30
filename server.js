@@ -50,7 +50,7 @@ app.get('/comments', async (req, res) => {
   const { sort, mood, search } = req.query;
   let query = supabase.from('comments').select('*');
   if (mood) query = query.eq('mood', mood);
-  if (search) query = query.or('song.ilike.%' + search + '%,feeling.ilike.%' + search + '%');
+  if (search) query = query.or('song.ilike.%' + search + '%,artist.ilike.%' + search + '%,feeling.ilike.%' + search + '%');
   if (sort === 'recent') query = query.order('created_at', { ascending: false });
   else if (sort === 'alpha') query = query.order('song', { ascending: true });
   else query = query.order('votes', { ascending: false });
